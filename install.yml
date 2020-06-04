@@ -1,4 +1,4 @@
-- hosts: "{{ install_host | default('localhost')}}"
+- hosts: all
   become: yes
   become_method: sudo
   gather_facts: yes
@@ -10,10 +10,10 @@
       - powershell
       - git
       - yum-utils
+      - nodejs
 
     yum_online_repo_files:
       - 'ms-pwsh.repo'
-
 
     yum_repo_keys:
       - 'microsoft.asc'
@@ -40,8 +40,14 @@
         state: latest
         update_cache: yes
 
-    - name: update all the things
-      yum: 
-        name: ' * '
-        state: latest
-        update_cache: yes
+    # - name: update all the things
+    #   yum: 
+    #     name: ' * '
+    #     state: latest
+    #     update_cache: yes
+
+    - name: install PowerCLI
+      shell:
+        executable: /usr/bin/pwsh
+        cmd: "if (-not (Get-InstalledModule vmware.powercli -ErrorAction silentlycontinue)){ Install-Module vmware.powercli -Confirm:$False -Force }"
+      become: no
